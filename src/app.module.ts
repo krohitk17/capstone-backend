@@ -1,10 +1,24 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
+
+import { MqttService } from './mqtt.service';
+import { AdminModule } from './admin/admin.module';
+import { BinModule } from './bin/bin.module';
+
+import configuration from './configuration';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [configuration],
+    }),
+    MongooseModule.forRoot(configuration().dbConfig.mongo_url),
+    AdminModule,
+    BinModule,
+  ],
+  controllers: [],
+  providers: [MqttService],
 })
 export class AppModule {}
