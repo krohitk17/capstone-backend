@@ -11,8 +11,13 @@ export class BinData {
   })
   status: string;
 
-  @Prop({ type: GeolocationCoordinates })
-  location: GeolocationCoordinates;
+  @Prop({
+    type: { type: String, default: 'Point' },
+    coordinates: [Number],
+    min: [-180, -90],
+    max: [180, 90],
+  })
+  location: [number, number];
 
   @Prop({ type: Number, min: 0, max: 100, isInteger: true })
   capacity: number;

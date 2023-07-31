@@ -1,4 +1,6 @@
 import {
+  ArrayMaxSize,
+  IsArray,
   IsEnum,
   IsMongoId,
   IsNotEmpty,
@@ -20,7 +22,16 @@ export class BinDto {
   status: string;
 
   @IsNotEmpty()
-  location: GeolocationCoordinates;
+  @IsArray({
+    each: true,
+  })
+  @ArrayMaxSize(2)
+  @IsNumber({}, { each: true })
+  @Min(-90, { each: true })
+  @Max(90, { each: true })
+  @Min(-180, { each: true })
+  @Max(180, { each: true })
+  location: [number, number];
 
   @IsNotEmpty()
   @IsNumber()
