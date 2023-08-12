@@ -1,37 +1,78 @@
 import {
   Controller,
-  Get,
-  Post,
   Body,
   Patch,
-  Param,
-  Delete,
+  Post,
+  Get,
+  UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
+
 import { AdminService } from './admin.service';
-import { CreateAdminDto } from './dto/create-admin.dto';
-import { UpdateAdminDto } from './dto/update-admin.dto';
+import { BinService } from 'src/bin/bin.service';
+import { MqttService } from 'src/bin/mqtt.service';
+import { ChangeStatusDto, CreateAdminDto } from './dto/request.dto';
+import { AdminDto, ResponseBinDto } from './dto/response.dto';
+import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from './auth.guard';
+import { SuperAuthGuard } from './superauth.guard';
 
 @Controller('admin')
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly binService: BinService,
+    private readonly mqttService: MqttService,
+    private readonly jwtService: JwtService,
+  ) {}
 
-  @Post()
-  create(@Body() createAdminDto: CreateAdminDto) {
-    return this.adminService.create(createAdminDto);
+  @Get('login')
+  async login(@Body() body: CreateAdminDto): Promise<{ token: string }> {
+    const isValid = await this.adminService.validatePassword(
+      body.username,
+      body.password,
+    );
+    if (isValid) {
+      const token = await this.jwtService.signAsync({
+        username: body.username,
+      });
+      return { token };
+    }
+    throw new UnauthorizedException('Invalid credentials');
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.adminService.findOne(+id);
+  @UseGuards(AuthGuard)
+  @UseGuards(SuperAuthGuard)
+  @Post('createAdmin')
+  async createAdmin(@Body() body: CreateAdminDto): Promise<AdminDto> {
+    const admin = await this.adminService.createAdmin(body);
+    return admin;
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAdminDto: UpdateAdminDto) {
-    return this.adminService.update(+id, updateAdminDto);
+  @UseGuards(AuthGuard)
+  @Post('createbin')
+  async createBin(): Promise<ResponseBinDto> {
+    const bin = await this.binService.createBin();
+    return {
+      _id: bin._id,
+      capacity: bin.capacity,
+      status: bin.status,
+      loc: bin.loc.coordinates,
+    };
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.adminService.remove(+id);
+  @UseGuards(AuthGuard)
+  @Patch('changeStatus')
+  async changeStatus(@Body() body: ChangeStatusDto): Promise<ResponseBinDto> {
+    const updatedBin = await this.binService.updateBin(body.id, {
+      status: body.status,
+    });
+    await this.mqttService.publishStatus(body.id, updatedBin.status);
+    return {
+      _id: updatedBin._id,
+      capacity: updatedBin.capacity,
+      status: updatedBin.status,
+      loc: updatedBin.loc.coordinates,
+    };
   }
 }

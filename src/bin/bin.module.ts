@@ -1,13 +1,15 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { BinController } from './bin.controller';
 import { BinService } from './bin.service';
-import { BinSchema } from './bin.schema';
+import { Bin, BinSchema } from './bin.schema';
+import { MqttService } from 'src/bin/mqtt.service';
+import { BinController } from './bin.controller';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: 'Bin', schema: BinSchema }])],
+  imports: [MongooseModule.forFeature([{ name: Bin.name, schema: BinSchema }])],
   controllers: [BinController],
-  providers: [BinService],
+  providers: [BinService, MqttService],
+  exports: [BinService, MqttService],
 })
 export class BinModule {}

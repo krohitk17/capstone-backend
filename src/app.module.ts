@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-
-import { MqttService } from './mqtt.service';
-import { AdminModule } from './admin/admin.module';
-import { BinModule } from './bin/bin.module';
+import { MongooseModule } from '@nestjs/mongoose';
 
 import configuration from './configuration';
-import { MongooseModule } from '@nestjs/mongoose';
+
+import { BinModule } from './bin/bin.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -15,10 +14,11 @@ import { MongooseModule } from '@nestjs/mongoose';
       load: [configuration],
     }),
     MongooseModule.forRoot(configuration().dbConfig.mongo_url),
-    AdminModule,
+
     BinModule,
+    AdminModule,
   ],
   controllers: [],
-  providers: [MqttService],
+  providers: [],
 })
 export class AppModule {}

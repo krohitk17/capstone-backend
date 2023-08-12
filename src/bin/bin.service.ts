@@ -1,57 +1,75 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { BinData, BinDocument } from './bin.schema';
-import { BinDto } from './dto/bin.dto';
+import { Bin, BinDocument } from './bin.schema';
+import { BinDto, BinUpdateDto } from './bin.dto';
 
 @Injectable()
 export class BinService {
   constructor(
-    @InjectModel(BinData.name) private readonly binModel: Model<BinDocument>,
+    @InjectModel(Bin.name) private readonly binModel: Model<BinDocument>,
   ) {}
 
   async createBin(): Promise<BinDto> {
     const bin = new this.binModel();
-    try {
-      await bin.save();
-    } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException();
-    }
+    await bin.save();
     return bin;
   }
 
   async getBin(id: string): Promise<BinDto> {
-    try {
-      return await this.binModel.findById(id).exec();
-    } catch (error) {
-      console.log(error);
-      throw new NotFoundException();
+    const bin = await this.binModel.findById(id).exec();
+    if (!bin) {
+      Logger.error(`Bin ${id} not found`, 'BinService');
+      return;
     }
+    return bin;
   }
 
-  async updateBin(id: string, bin: BinData): Promise<BinDto> {
-    try {
-      return await this.binModel.findByIdAndUpdate(id, bin, {
-        new: true,
-      });
-    } catch (error) {
-      console.log(error);
-      throw new NotFoundException();
+  async getNearestBins(
+    longitude: number,
+    latitude: number,
+    distance: number,
+  ): Promise<BinDto[]> {
+    return await this.binModel
+      .find({
+        loc: {
+          $nearSphere: {
+            $geometry: {
+              type: 'Point',
+              coordinates: [longitude, latitude],
+            },
+            $maxDistance: distance,
+          },
+        },
+      })
+      .exec();
+  }
+
+  async updateBin(id: string, updateData: BinUpdateDto): Promise<BinDto> {
+    const bin = await this.getBin(id);
+    if (!bin) {
+      return;
     }
+    if (bin.status === 'inactive') {
+      if (!updateData.status) {
+        Logger.error('Bin is inactive', 'BinService');
+        return;
+      }
+    }
+    if (updateData.status === 'active') {
+      updateData.status = bin.capacity === 100 ? 'full' : 'active';
+    }
+    if (updateData.capacity) {
+      updateData.status = updateData.capacity === 100 ? 'full' : 'active';
+    }
+
+    return await this.binModel.findByIdAndUpdate(id, updateData, {
+      new: true,
+    });
   }
 
   async removeBin(id: string): Promise<BinDto> {
-    try {
-      return await this.binModel.findByIdAndDelete(id);
-    } catch (error) {
-      console.log(error);
-      throw new NotFoundException();
-    }
+    return await this.binModel.findByIdAndDelete(id);
   }
 }

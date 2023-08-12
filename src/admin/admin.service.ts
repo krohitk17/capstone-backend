@@ -1,22 +1,37 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAdminDto } from './dto/create-admin.dto';
-import { UpdateAdminDto } from './dto/update-admin.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { compare } from 'bcryptjs';
+
+import { Admin, AdminDocument } from './admin.schema';
 
 @Injectable()
 export class AdminService {
-  create(createAdminDto: CreateAdminDto) {
-    return 'This action adds a new admin';
+  constructor(
+    @InjectModel(Admin.name) private readonly adminModel: Model<AdminDocument>,
+  ) {}
+
+  async createAdmin(body: any): Promise<any> {
+    const admin = await this.adminModel.create(body);
+    return admin;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} admin`;
+  async getAdmin(username: string): Promise<any> {
+    const admin = await this.adminModel.findOne({ username }).exec();
+    if (!admin) {
+      throw new NotFoundException(`Admin ${username} not found`);
+    }
+    return admin;
   }
 
-  update(id: number, updateAdminDto: UpdateAdminDto) {
-    return `This action updates a #${id} admin`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} admin`;
+  async validatePassword(username: string, password: string): Promise<any> {
+    const admin = await this.adminModel
+      .findOne({ username })
+      .select('password')
+      .exec();
+    if (!admin) {
+      throw new NotFoundException(`Admin ${username} not found`);
+    }
+    return await compare(password, admin.password);
   }
 }
