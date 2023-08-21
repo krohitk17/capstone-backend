@@ -3,7 +3,6 @@ import {
   Body,
   Patch,
   Post,
-  Get,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -26,7 +25,7 @@ export class AdminController {
     private readonly jwtService: JwtService,
   ) {}
 
-  @Get('login')
+  @Post('login')
   async login(@Body() body: CreateAdminDto): Promise<{ token: string }> {
     const isValid = await this.adminService.validatePassword(
       body.username,
