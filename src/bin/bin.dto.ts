@@ -13,6 +13,7 @@ import { ObjectId } from 'mongodb';
 
 import { CoordinatesFormatConstraint } from './bin.validator';
 import { Bin } from './bin.schema';
+import { Type } from 'class-transformer';
 
 class LocationDto {
   @IsDefined()
@@ -49,6 +50,7 @@ export class NearestBinsRequestDto {
   @IsNotEmpty()
   @Min(-180)
   @Max(180)
+  @Type(() => Number)
   longitude: number;
 
   @IsDefined()
@@ -56,6 +58,7 @@ export class NearestBinsRequestDto {
   @IsNotEmpty()
   @Min(-90)
   @Max(90)
+  @Type(() => Number)
   latitude: number;
 
   @IsDefined()
@@ -63,5 +66,6 @@ export class NearestBinsRequestDto {
   @IsNotEmpty()
   @Min(0)
   @Max(2000)
+  @Type(() => Number)
   distance: number;
 }
