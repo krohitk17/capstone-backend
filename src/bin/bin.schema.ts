@@ -8,7 +8,7 @@ export class Location {
   })
   type: 'Point';
 
-  @Prop({ type: [Number], required: true })
+  @Prop({ type: [Number, Number], required: true })
   coordinates: [number, number];
 }
 
@@ -24,7 +24,7 @@ export class Bin {
   @Prop({
     type: Location,
     required: true,
-    default: { type: 'Point', coordinates: [0, 0] },
+    default: { type: 'Point', coordinates: [0.1, 0.1] },
   })
   loc: Location;
 
@@ -37,6 +37,19 @@ export class Bin {
     default: 0,
   })
   capacity: number;
+
+  @Prop({
+    type: Number,
+    required: true,
+    default: 0,
+  })
+  reports: number;
+
+  @Prop({
+    type: Boolean,
+    required: true,
+  })
+  isBiodegradable: boolean;
 }
 
 export type BinDocument = HydratedDocument<Bin>;

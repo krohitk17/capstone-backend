@@ -50,8 +50,10 @@ export class AdminController {
 
   @UseGuards(AuthGuard)
   @Post('createbin')
-  async createBin(): Promise<ResponseBinDto> {
-    const bin = await this.binService.createBin();
+  async createBin(
+    @Body('isBiodegradable') isBio: boolean,
+  ): Promise<ResponseBinDto> {
+    const bin = await this.binService.createBin(isBio);
     return {
       _id: bin._id,
       capacity: bin.capacity,
@@ -62,16 +64,11 @@ export class AdminController {
 
   @UseGuards(AuthGuard)
   @Patch('changeStatus')
-  async changeStatus(@Body() body: ChangeStatusDto): Promise<ResponseBinDto> {
+  async changeStatus(@Body() body: ChangeStatusDto): Promise<boolean> {
     const updatedBin = await this.binService.updateBin(body.id, {
       status: body.status,
     });
     await this.mqttService.publishStatus(body.id, updatedBin.status);
-    return {
-      _id: updatedBin._id,
-      capacity: updatedBin.capacity,
-      status: updatedBin.status,
-      loc: updatedBin.loc.coordinates,
-    };
+    return updatedBin._id.toString() === body.id;
   }
 }

@@ -50,8 +50,8 @@ export class MqttService {
       if (topic === this.locationTopic) {
         const data = message.toString().split('/');
         const binId = data[0];
-        const longitude = parseFloat(data[1]);
-        const latitude = parseFloat(data[2]);
+        const latitude = parseFloat(data[1]);
+        const longitude = parseFloat(data[2]);
         if (isNaN(longitude) || isNaN(latitude)) {
           Logger.error(
             'Invalid location ' + longitude + ' ' + latitude,
@@ -59,6 +59,7 @@ export class MqttService {
           );
         }
         const coordinates = [longitude, latitude];
+        console.log(coordinates);
         this.binService.updateBin(binId, {
           loc: { type: 'Point', coordinates },
         });

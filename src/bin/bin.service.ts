@@ -11,8 +11,10 @@ export class BinService {
     @InjectModel(Bin.name) private readonly binModel: Model<BinDocument>,
   ) {}
 
-  async createBin(): Promise<BinDto> {
-    const bin = new this.binModel();
+  async createBin(isBio: boolean): Promise<BinDto> {
+    const bin = new this.binModel({
+      isBiodegradable: isBio,
+    });
     await bin.save();
     return bin;
   }
@@ -42,6 +44,7 @@ export class BinService {
             $maxDistance: distance,
           },
         },
+        status: 'active',
       })
       .exec();
   }
@@ -71,5 +74,11 @@ export class BinService {
 
   async removeBin(id: string): Promise<BinDto> {
     return await this.binModel.findByIdAndDelete(id);
+  }
+
+  async reportBin(id: string): Promise<boolean> {
+    const bin = await this.getBin(id);
+    await this.updateBin(id, { reports: bin.reports + 1 });
+    return true;
   }
 }

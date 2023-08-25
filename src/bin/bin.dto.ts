@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsDefined,
   IsEnum,
   IsNotEmpty,
@@ -42,6 +43,16 @@ export class BinUpdateDto {
   @IsString()
   @IsEnum(['inactive', 'active'])
   status?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(3)
+  reports?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isBiodegradable?: boolean;
 }
 
 export class NearestBinsRequestDto {

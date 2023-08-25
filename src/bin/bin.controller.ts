@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 
 import { BinService } from './bin.service';
 import { ResponseBinDto } from 'src/admin/dto/response.dto';
@@ -34,5 +34,11 @@ export class BinController {
       status: bin.status,
       loc: bin.loc.coordinates,
     }));
+  }
+
+  @Post('report')
+  async reportBin(@Body() id: { id: string }): Promise<string> {
+    console.log(id);
+    return 'Bin reported successfully';
   }
 }
