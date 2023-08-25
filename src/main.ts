@@ -14,7 +14,7 @@ async function bootstrap() {
     }),
   );
   app.use(logger);
-  await app.listen(3000);
+  await app.listen(process.env.PORT || 5001);
 
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
