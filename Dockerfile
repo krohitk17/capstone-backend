@@ -25,8 +25,6 @@ WORKDIR /usr/src/app
 COPY package.json ./
 COPY package-lock.json ./
 
-COPY service-account-file.json ./
-
 RUN npm i -g npm@9.8.0
 
 ARG NODE_ENV=production
