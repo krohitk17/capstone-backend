@@ -24,6 +24,7 @@ WORKDIR /usr/src/app
 
 COPY package.json ./
 COPY package-lock.json ./
+COPY .env ./
 
 RUN npm i -g npm@9.8.0
 

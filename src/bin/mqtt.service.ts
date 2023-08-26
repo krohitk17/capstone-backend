@@ -15,7 +15,7 @@ export class MqttService {
     const host = configuration().mqtt.host;
     const port = configuration().mqtt.port;
 
-    const connectUrl = `mqtt://${host}:${port}`;
+    const connectUrl = `${host}:${port}`;
 
     this.mqttClient = connect(connectUrl, {
       username: configuration().mqtt.username,

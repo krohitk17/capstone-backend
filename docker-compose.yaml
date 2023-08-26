@@ -1,0 +1,13 @@
+version: '3.4'
+services:
+  capstone-backend:
+    platform: linux/amd64
+    image: krohitk17/capstone-project:latest
+    container_name: capstone-backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile
