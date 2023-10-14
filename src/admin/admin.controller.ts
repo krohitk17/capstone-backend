@@ -6,23 +6,23 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 
 import { AdminService } from './admin.service';
 import { BinService } from 'src/bin/bin.service';
-import { MqttService } from 'src/bin/mqtt.service';
 import { ChangeStatusDto, CreateAdminDto } from './dto/request.dto';
 import { AdminDto, ResponseBinDto } from './dto/response.dto';
-import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from './auth.guard';
 import { SuperAuthGuard } from './superauth.guard';
+import { MqttService } from 'src/mqtt/mqtt.service';
 
 @Controller('admin')
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
     private readonly binService: BinService,
-    private readonly mqttService: MqttService,
     private readonly jwtService: JwtService,
+    private readonly mqttService: MqttService,
   ) {}
 
   @Post('login')
@@ -65,6 +65,7 @@ export class AdminController {
   @UseGuards(AuthGuard)
   @Patch('changeStatus')
   async changeStatus(@Body() body: ChangeStatusDto): Promise<boolean> {
+    console.log('here');
     const updatedBin = await this.binService.updateBin(body.id, {
       status: body.status,
     });
