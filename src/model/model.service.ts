@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import * as tf from '@tensorflow/tfjs-node';
 
@@ -22,9 +22,8 @@ export class ModelService {
       imgResized.div(255).expandDims(0),
     ) as tf.Tensor;
 
-    console.log(await predictions.data());
     const yhat = (await predictions.data())[0];
-    console.log(yhat);
+    Logger.log(yhat, 'ModelService');
 
     return yhat < 0.5 ? 'Biodegradable' : 'Non-Biodegradable';
   }
