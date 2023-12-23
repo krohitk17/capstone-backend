@@ -1,8 +1,8 @@
 version: '3.4'
 services:
   capstone-backend:
-    platform: linux/amd64
-    image: krohitk17/capstone-project:latest
+    platform: linux/x86_64
+    image: krohitk17/capstone-backend:latest
     container_name: capstone-backend
     ports:
       - "5000:5000"

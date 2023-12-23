@@ -26,7 +26,14 @@ export class MqttController {
     const binId = data[0];
     const latitude = parseFloat(data[1]);
     const longitude = parseFloat(data[2]);
-    if (isNaN(longitude) || isNaN(latitude)) {
+    if (
+      isNaN(longitude) ||
+      isNaN(latitude) ||
+      longitude < -180 ||
+      longitude > 180 ||
+      latitude < -90 ||
+      latitude > 90
+    ) {
       Logger.error(
         'Invalid location ' + longitude + ' ' + latitude,
         'MqttService',
@@ -48,7 +55,7 @@ export class MqttController {
     const data = message.toString().split('/');
     const binId = data[0];
     const capacity = parseInt(data[1]);
-    if (isNaN(capacity)) {
+    if (isNaN(capacity) || capacity < 0) {
       Logger.error('Invalid capacity ' + capacity, 'MqttService');
     }
     await this.binService.updateBin(binId, { capacity });
